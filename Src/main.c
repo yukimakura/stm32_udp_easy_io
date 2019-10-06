@@ -56,14 +56,14 @@ osThreadId_t defaultTaskHandle;
 static void main_task(void *arg) {
 
 //	/* Infinite loop */
-	char *tstt = "rtos_send_test";
+	char *testword = "rtos_send_test";
 	char *readstr;
 	for (;;) {
 
-		UDP_EASY_IO_write(tstt);
-		if(UDP_EASY_IO_was_read() != 1){
-			readstr = UDP_EASY_IO_read_char_prt(ONCE,10000);
-			HAL_UART_Transmit(&huart3,readstr,strlen(readstr),100);
+		UDP_EASY_IO_write(testword);//文字列をUDP通信で送信
+		if(UDP_EASY_IO_was_read() != 1){//新しくデータを受信してるか確認
+			readstr = UDP_EASY_IO_read_char_prt();//文字列を格納（ポインタ返し）
+			HAL_UART_Transmit(&huart3,readstr,strlen(readstr),100);//受信した文字をPC用UARTで送信
 		}
 		vTaskDelay( 100 );
 	}
@@ -147,12 +147,12 @@ int main(void) {
 
 	/* USER CODE BEGIN RTOS_THREADS */
 	ip4_addr_t dst_addr;
-	IP4_ADDR(&dst_addr,192,168,137,1);
-	unsigned short dst_port = 54321;
-	unsigned short own_port = 12345;
-	UDP_EASY_IO_init(dst_addr,dst_port,own_port);
+	IP4_ADDR(&dst_addr,192,168,137,1);//相手のコンピュータのIPアドレス
+	unsigned short dst_port = 54321;//相手のコンピュータのポート
+	unsigned short own_port = 12345;//自身のポート
+	UDP_EASY_IO_init(dst_addr,dst_port,own_port);//UDP通信のための初期化処理
 
-	xTaskCreate(&main_task , "main_task", 512, NULL, 1, NULL);
+	xTaskCreate(&main_task , "main_task", 512, NULL, 1, NULL);//メイン処理用のスレッドの宣言
 
 	/* add threads, ... */
 	/* USER CODE END RTOS_THREADS */
@@ -348,53 +348,7 @@ static void MX_GPIO_Init(void) {
 }
 
 /* USER CODE BEGIN 4 */
-//void udp_echo_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,struct ip_addr *addr, u16_t port) {
-//	if (p != NULL) {
-//		udp_sendto(pcb, p, IP_ADDR_BROADCAST, 8080); //dest port
-//		pbuf_free(p);
-//	}
-//}
-//
-///* USER CODE END 4 */
-//
-///* USER CODE BEGIN Header_StartDefaultTask */
-///**
-// * @brief  Function implementing the defaultTask thread.
-// * @param  argument: Not used
-// * @retval None
-// */
-///* USER CODE END Header_StartDefaultTask */
-//void StartDefaultTask(void *arg) {
-//
-//	/* init code for LWIP */
-//	MX_LWIP_Init();
-//
-//	/* USER CODE BEGIN 5 */
-//	struct udp_pcb *pcb;
-//	struct pbuf *p;
-//	err_t err;
-//	ip4_addr_t dst_addr;
-//	const unsigned short src_port = 12345;
-//	const unsigned short dst_port = 8080;
-//
-//	IP4_ADDR(&dst_addr, 192, 168, 137, 1);
-//
-//	pcb = udp_new();
-//	err = udp_bind(pcb, IP_ADDR_ANY, src_port);
-//	udp_recv(pcb, udp_echo_recv, NULL);
-//
-//	uint32_t cnt = 0;
-//	/* Infinite loop */
-//	for (;;) {
-//		p = pbuf_alloc(PBUF_TRANSPORT, sizeof(4), PBUF_RAM);
-//		*(uint32_t *) p->payload = cnt++;
-//		p->len = 4;
-//		err = udp_sendto(pcb, p, &dst_addr, dst_port);
-//		pbuf_free(p);
-//		osDelay(1000);
-//	}
-//	/* USER CODE END 5 */
-//}
+/* USER CODE END 4 */
 
 /**
  * @brief  This function is executed in case of error occurrence.
