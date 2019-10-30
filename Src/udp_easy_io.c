@@ -17,14 +17,17 @@ static char udp_read_buffer_[128];
 static unsigned char read_flag_;
 static char *empty_str_ = "";
 
+static osMutexId_t myMutexEthrHandle;
 
 static void UDP_EASY_IO_recv_(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 		const ip_addr_t *addr, u16_t port) {
 	char printbuff[64] = "";
 	if (p != NULL) {
+		osMutexAcquire(myMutexEthrHandle, osWaitForever);
 		memset(udp_read_buffer_,'\0',sizeof(udp_read_buffer_));//buffer clear
 		memcpy(udp_read_buffer_,p->payload,p->len);
 		read_flag_ = 0;
+		osMutexRelease(myMutexEthrHandle);
 	}
 }
 
@@ -47,10 +50,12 @@ void UDP_EASY_IO_write(char *payload) {
 
 	struct pbuf *p;
 
+	osMutexAcquire(myMutexEthrHandle, osWaitForever);
 	p = pbuf_alloc(PBUF_TRANSPORT, strlen(payload), PBUF_RAM);
 	memcpy(p->payload, payload, strlen(payload));
 	udp_sendto(pcb_, p, &dst_addr_, dst_port_);
 	pbuf_free(p);
+	osMutexRelease(myMutexEthrHandle);
 }
 unsigned char UDP_EASY_IO_was_read() {
 	return read_flag_;
@@ -71,5 +76,13 @@ void UDP_EASY_IO_init(ip4_addr_t dst_addr, unsigned short dst_port,
 	dst_port_ = dst_port;
 	own_port_ = own_port;
 	sprintf(udp_read_buffer_,"");
+
+	/* Create the mutex(es) */
+	/* definition and creation of myMutexEthr */
+	const osMutexAttr_t myMutexEthr_attributes = {
+			.name = "myMutexEthr",
+	};
+	myMutexEthrHandle = osMutexNew(&myMutexEthr_attributes);
+
 	xTaskCreate(&UDP_EASY_IO_main_task_ , "UDP_EASY_IO_main_task", 512, NULL, 1, NULL);
 }
