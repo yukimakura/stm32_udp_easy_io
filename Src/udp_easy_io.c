@@ -27,6 +27,7 @@ static void UDP_EASY_IO_recv_(void *arg, struct udp_pcb *pcb, struct pbuf *p,
 			memcpy(udp_read_buffer_,p->payload,p->len);
 			read_flag_ = 0;
 			osMutexRelease(myMutexEthrHandle_);
+			pbuf_free(p);
 		}
 	}
 }
