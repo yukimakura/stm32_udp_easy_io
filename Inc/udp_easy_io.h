@@ -20,6 +20,7 @@ extern "C" {
 
 #define FORCE 1
 #define ONCE 0
+#define UDP_READ_BUFFER_SIZE 256//読み込み時のバッファサイズ
 
 
 void UDP_EASY_IO_init(ip4_addr_t dst_addr,unsigned short dst_port,unsigned short own_port);
